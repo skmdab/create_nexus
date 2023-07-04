@@ -5,7 +5,7 @@ pipeline{
     stages{
         stage('Checkout the code'){
             steps{
-                git branch: 'main', credentialsId: 'git_token', url: 'https://github.com/skmdab/create_jenkins.git'
+                git branch: 'main', credentialsId: 'git_token', url: 'https://github.com/skmdab/create_nexus.git'
             }
         }
 
