@@ -1,5 +1,5 @@
 ---
-- hosts: 10.0.0.23
+- hosts: nexus
   gather_facts: no
   become: true
   tasks:
