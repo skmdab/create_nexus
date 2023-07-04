@@ -1,0 +1,81 @@
+---
+- hosts: 10.0.0.23
+  gather_facts: no
+  become: true
+  tasks:
+  - name: install java 1.8
+    yum:
+     name: java-1.8.0-openjdk
+     state: present
+
+  - name: download nexus package
+    get_url:
+     url: https://download.sonatype.com/nexus/3/nexus-3.56.0-01-unix.tar.gz
+     dest: /opt/
+
+  - name: extract the archive file
+    unarchive:
+     src: /opt/nexus-3.56.0-01-unix.tar.gz
+     dest: /opt/
+     remote_src: yes
+
+  - name: rename the nexus repositary
+    shell:
+     mv /opt/nexus-3.56.0-01 /opt/nexus
+
+  - name: create the nexus user
+    user:
+     name: nexus
+     create_home: yes
+     shell: /bin/bash
+     password: "{{ 'redhat' | password_hash('sha512','A512') }}"
+
+  - name: sudo acces for nexus user
+    copy:
+     dest: /etc/sudoers.d/nexus
+     content: 'nexus ALL=(ALL) NOPASSWD: ALL'
+     validate: /usr/sbin/visudo -cf %s
+
+  - name: change the owner and group ownership od the nexus folder
+    file:
+     path: /opt/nexus/
+     owner: nexus
+     group: nexus
+     mode: 0775
+     recurse: yes
+     state: directory
+  
+  - name: change the owner and group ownership of the sonatype folder
+    file:
+     path: /opt/sonatype-work/
+     owner: nexus
+     group: nexus
+     mode: 0775
+     recurse: yes
+     state: directory
+
+  - name: set the run as user parameter in nexus.rc
+    lineinfile:
+     dest: /opt/nexus/bin/nexus.rc
+     regexp: "#run_as_user="
+     line: "run_as_user=nexus"
+     backrefs: true
+
+  - name: create soft link for nexus
+    file:
+     src: /opt/nexus/bin/nexus
+     dest: /etc/init.d/nexus
+     state: link
+
+  - name: enable the nexus service
+    systemd:
+     name: nexus
+     enabled: true
+
+  - name: start the nexus service
+    systemd:
+     name: nexus
+     state: started
+     daemon_reload: yes
+     enabled: yes
+...
