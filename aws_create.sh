@@ -61,7 +61,7 @@ PHLINE="[$INSTANCENAME]\n\n$PUBLICIP ansible_user=ec2-user ansible_ssh_private_k
 PATH="/root/.jenkins/workspace/$INSTANCENAME"
 
 if [ "$(echo "$PWD")" = "$PATH" ]; then
-  echo "$PCLINE" > /etc/ansible/hosts
+  echo "$PCLINE" > hosts
 else
   echo "$PHLINE" > hosts
 fi
