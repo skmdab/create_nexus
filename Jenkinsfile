@@ -17,7 +17,9 @@ pipeline{
 
         stage('Installing nexus package into server'){
             steps{
-                sh "ansible-playbook installnexusserver.yaml"
+                withCredentials([file(credentialsId: 'pemfile', variable: 'PEMFILE')]) {
+		   sh 'ansible-playbook installnexusserver.yaml --private-key="$PEMFILE"'
+		}
             }
         }
     }
